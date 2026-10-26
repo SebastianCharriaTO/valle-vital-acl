@@ -1,0 +1,10 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{% block titulo %}ACL Valle Vital{% endblock %}</title>
+<link rel="stylesheet" href="/static/estilo.css"></head><body>
+<header><h1>ACL Valle Vital (prototipo)</h1>
+<a href="/">Inicio</a><a href="/solicitar-cita">Solicitar cita</a><a href="/profesional">Profesional</a>
+<a href="/farmacia">Farmacia</a><a href="/admin">Administracion</a><a href="/docs">API (Swagger)</a>
+<span style="margin-left:auto">Motor IA: <b>{{ motor }}</b> · Circuito: <span class="chip {{ circuito }}">{{ circuito }}</span></span></header>
+<main><div class="aviso"><b>Prototipo academico con datos sinteticos.</b> Entidad ficticia. El asistente <b>no diagnostica</b>: sugiere una prioridad y el profesional decide.</div>
+{% block cuerpo %}{% endblock %}</main></body></html>

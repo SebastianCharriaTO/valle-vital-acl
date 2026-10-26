@@ -1,0 +1,14 @@
+{% extends "base.html" %}{% block cuerpo %}
+<h2>Administracion y salud del sistema</h2>
+<div class="tarjetas">
+<div class="tarjeta"><b>{{ motor }}</b>motor de IA configurado</div>
+<div class="tarjeta"><b class="chip {{ circuito }}" style="font-size:1.1rem">{{ circuito }}</b>estado del circuito ({{ fallos }} fallos consecutivos)</div>
+<div class="tarjeta"><b>{{ 'CAIDO (simulado)' if falla else 'disponible' }}</b>proveedor de IA externo</div></div>
+<form method="post" action="/admin/falla" style="display:flex;gap:.5rem;margin-bottom:1rem">
+<button name="falla" value="1">Simular caida del proveedor</button><button class="sec" name="falla" value="0">Restablecer proveedor</button></form>
+<p>Endpoints operativos: <a href="/health">/health</a> · <a href="/health/ready">/health/ready</a> · <a href="/docs">/docs</a></p>
+<h3>Bitacora de recomendaciones (ultimas 15)</h3>
+<table><tr><th>ID</th><th>Momento</th><th>Tipo</th><th>Detalle</th><th>Motor</th></tr>
+{% for b in bitacora %}<tr><td>{{ b.id }}</td><td>{{ b.momento.strftime('%H:%M:%S') }}</td><td>{{ b.tipo }}</td><td>{{ b.detalle }}</td><td>{{ b.motor or '' }}</td></tr>
+{% else %}<tr><td colspan="5">Sin entradas.</td></tr>{% endfor %}</table>
+{% endblock %}

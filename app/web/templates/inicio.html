@@ -1,0 +1,18 @@
+{% extends "base.html" %}{% block cuerpo %}
+<h2>Panel general</h2>
+<div class="tarjetas">
+<div class="tarjeta"><b>{{ total_citas }}</b>citas registradas</div>
+<div class="tarjeta"><b>{{ pendientes|length }}</b>prioridades por confirmar (alta/urgente)</div>
+<div class="tarjeta"><b>{{ bajo_minimo|length }}</b>items de inventario bajo el minimo</div>
+<div class="tarjeta"><b class="chip {{ circuito }}" style="font-size:1.1rem">{{ circuito }}</b>circuito del proveedor de IA</div>
+</div>
+<h3>Proximas citas</h3>
+<table><tr><th>ID</th><th>Paciente</th><th>Sede</th><th>Especialidad</th><th>Inicio</th><th>Prioridad</th><th>Estado</th></tr>
+{% for c in citas %}<tr><td>{{ c.id }}</td><td>{{ pacientes[c.paciente_id] }}</td><td>{{ sedes[c.sede_id] }}</td><td>{{ c.especialidad }}</td>
+<td>{{ c.inicio.strftime('%Y-%m-%d %H:%M') }}</td><td><span class="p-{{ c.prioridad.value }}">{{ c.prioridad.value }}</span></td><td>{{ c.estado.value }}</td></tr>
+{% else %}<tr><td colspan="7">Aun no hay citas. <a href="/solicitar-cita">Solicitar una</a>.</td></tr>{% endfor %}</table>
+<h3>Inventario bajo el minimo</h3>
+<table><tr><th>Sede</th><th>Medicamento</th><th>Stock</th><th>Minimo</th></tr>
+{% for i in bajo_minimo %}<tr><td>{{ sedes[i.sede_id] }}</td><td>{{ meds[i.medicamento_id] }}</td><td>{{ i.stock }}</td><td>{{ i.minimo }}</td></tr>
+{% else %}<tr><td colspan="4">Sin alertas.</td></tr>{% endfor %}</table>
+{% endblock %}

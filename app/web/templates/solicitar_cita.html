@@ -1,0 +1,27 @@
+{% extends "base.html" %}{% block cuerpo %}
+<h2>Solicitar cita con orientacion de prioridad</h2>
+{% if resultado %}<div class="resultado">
+{% if resultado.error %}<p class="p-alta">{{ resultado.error }}</p>{% endif %}
+{% if resultado.triage %}{% set r = resultado.triage.resultado %}
+<h3>Prioridad sugerida: <span class="p-{{ r.prioridad.value }}">{{ r.prioridad.value|upper }}</span> <small>(puntaje {{ r.puntaje }}, motor: {{ r.motor }})</small></h3>
+<p>{{ r.explicacion }}</p>
+{% if r.requiere_confirmacion %}<p class="p-alta">Requiere confirmacion de un profesional de la salud antes de quedar confirmada.</p>{% endif %}
+<p><i>{{ r.advertencia }}</i></p>{% endif %}
+{% if resultado.cita %}{% set c = resultado.cita %}<p><b>Cita {{ c.id }}</b>: {{ c.especialidad }}, {{ c.inicio.strftime('%Y-%m-%d %H:%M') }}, estado <b>{{ c.estado.value }}</b>.</p>{% endif %}
+</div>{% endif %}
+<form class="caja" method="post" action="/solicitar-cita">
+<div class="fila">
+<div><label>Paciente (ficticio)</label><select name="paciente_id">{% for p in pacientes %}<option value="{{ p.id }}">{{ p.nombre }}</option>{% endfor %}</select></div>
+<div><label>Sede</label><select name="sede_id">{% for s in sedes %}<option value="{{ s.id }}">{{ s.nombre }}</option>{% endfor %}</select></div>
+<div><label>Especialidad</label><select name="especialidad">{% for e in especialidades %}<option>{{ e }}</option>{% endfor %}</select></div>
+</div>
+<div class="fila">
+<div><label>Edad</label><input type="number" name="edad" min="0" max="120" value="34" required></div>
+<div><label>Dias de evolucion</label><input type="number" name="dias_evolucion" min="0" max="365" value="2"></div>
+<div><label>Temperatura (C, opcional)</label><input type="number" step="0.1" name="temperatura_c" placeholder="38.5"></div>
+</div>
+<div><label>Sintomas</label><div class="sintomas">{% for s in sintomas %}<label><input type="checkbox" name="sintomas" value="{{ s }}"> {{ s }}</label>{% endfor %}</div></div>
+<div><label>Otros sintomas (separados por coma)</label><input name="otros"></div>
+<div><button type="submit">Obtener prioridad y asignar cita</button></div>
+</form>
+{% endblock %}

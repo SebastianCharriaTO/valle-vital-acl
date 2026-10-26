@@ -1,0 +1,14 @@
+{% extends "base.html" %}{% block cuerpo %}
+<h2>Farmacia: inventario y distribucion entre sedes</h2>
+<table><tr><th>Sede</th><th>Medicamento</th><th>Stock</th><th>Minimo</th><th>Estado</th></tr>
+{% for i in inventario %}<tr><td>{{ sedes[i.sede_id] }}</td><td>{{ meds[i.medicamento_id] }}</td><td>{{ i.stock }}</td><td>{{ i.minimo }}</td>
+<td>{% if i.stock < i.minimo %}<span class="p-alta">bajo el minimo</span>{% else %}ok{% endif %}</td></tr>{% endfor %}</table>
+<form method="post" action="/farmacia/generar"><button>Generar sugerencias de traslado</button></form>
+<h3>Sugerencias</h3>
+<table><tr><th>ID</th><th>Medicamento</th><th>Origen</th><th>Destino</th><th>Cantidad</th><th>Motivo</th><th>Estado</th><th></th></tr>
+{% for s in sugerencias %}<tr><td>{{ s.id }}</td><td>{{ meds[s.medicamento_id] }}</td><td>{{ sedes[s.sede_origen_id] if s.sede_origen_id else 'Central de farmacia' }}</td>
+<td>{{ sedes[s.sede_destino_id] }}</td><td>{{ s.cantidad }}</td><td>{{ s.motivo }}</td><td>{{ s.estado.value }}</td>
+<td>{% if s.estado == PEND %}<form method="post" action="/farmacia/resolver" style="display:flex;gap:.3rem"><input type="hidden" name="sugerencia_id" value="{{ s.id }}">
+<button name="accion" value="aprobar">Aprobar</button><button class="sec" name="accion" value="rechazar">Rechazar</button></form>{% endif %}</td></tr>
+{% else %}<tr><td colspan="8">Sin sugerencias. Pulse el boton para generarlas.</td></tr>{% endfor %}</table>
+{% endblock %}

@@ -1,0 +1,14 @@
+{% extends "base.html" %}{% block cuerpo %}
+<h2>Vista del profesional: confirmar prioridades</h2>
+<p>Las prioridades <b>alta</b> y <b>urgente</b> requieren confirmacion humana (RF-03 / RNF-05).</p>
+<table><tr><th>Triage</th><th>Paciente</th><th>Sugerida</th><th>Explicacion</th><th>Motor</th><th>Final</th><th>Accion</th></tr>
+{% for t in registros %}<tr><td>{{ t.id }}</td><td>{{ pacientes[t.paciente_id] }}</td>
+<td><span class="p-{{ t.resultado.prioridad.value }}">{{ t.resultado.prioridad.value }}</span></td><td>{{ t.resultado.explicacion }}</td><td>{{ t.resultado.motor }}</td>
+<td>{% if t.prioridad_final %}{{ t.prioridad_final.value }} ({{ t.confirmado_por }}){% else %}{% if t.resultado.requiere_confirmacion %}<b>pendiente</b>{% else %}no requerida{% endif %}{% endif %}</td>
+<td>{% if not t.prioridad_final %}<form method="post" action="/profesional/confirmar" style="display:flex;gap:.3rem">
+<input type="hidden" name="triage_id" value="{{ t.id }}">
+<select name="profesional_id">{% for p in profesionales %}<option value="{{ p.id }}">{{ p.nombre }}</option>{% endfor %}</select>
+<select name="prioridad">{% for p in prioridades %}<option {% if p == t.resultado.prioridad.value %}selected{% endif %}>{{ p }}</option>{% endfor %}</select>
+<button>Confirmar</button></form>{% endif %}</td></tr>
+{% else %}<tr><td colspan="7">Sin registros.</td></tr>{% endfor %}</table>
+{% endblock %}
