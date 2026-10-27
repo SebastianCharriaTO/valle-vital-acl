@@ -1,0 +1,14 @@
+# Blueprint de Render (Infrastructure as Code). Plan gratuito: el servicio se duerme tras 15 min sin trafico.
+services:
+  - type: web
+    name: valle-vital-acl
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.13.5
+      - key: MOTOR_IA
+        value: llm_simulado
