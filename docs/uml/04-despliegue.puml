@@ -1,0 +1,42 @@
+@startuml
+skinparam dpi 200
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 12
+skinparam NodeBackgroundColor #F5F5F5
+skinparam NodeBorderColor #333333
+skinparam ArtifactBackgroundColor #FFFFFF
+skinparam ArrowColor #333333
+
+node "Dispositivo del usuario" as CLI <<dispositivo>> {
+  node "Navegador web" as NAV <<entorno de ejecución>> {
+    artifact "Vistas HTML (Jinja2)\n+ Swagger UI (/docs)" as UI
+  }
+}
+
+cloud "GitHub" as GH {
+  artifact "Repositorio\nvalle-vital-acl" as REPO
+}
+
+node "Render (Web Service, plan gratuito)" as RND <<nube / PaaS>> {
+  node "Entorno Python 3.13" as PY <<entorno de ejecución>> {
+    node "Uvicorn (ASGI)" as UV {
+      artifact "app.main:app\n(FastAPI)" as APP
+      artifact "RepositorioMemoria\n+ seed.json (sintético)" as MEM
+    }
+  }
+  artifact "render.yaml\nrequirements.txt\n.python-version" as CFG
+}
+
+cloud "Proveedor de IA externo\n(simulado en el MVP)" as PROV <<opcional>>
+
+CLI --> RND : HTTPS (TLS terminado por Render)\nGET / · POST /api/citas · /docs
+GH --> RND : despliegue automático\n(build: pip install -r requirements.txt)
+APP --> MEM : lectura/escritura en memoria
+APP ..> PROV : HTTPS (futuro)\nprotegido por Circuit Breaker
+RND ..> APP : health check\nGET /health
+note bottom of RND
+  Plan gratuito: se duerme tras 15 min sin tráfico
+  (arranque en frío ≈ 1 min) y el disco es efímero.
+end note
+@enduml

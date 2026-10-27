@@ -1,0 +1,47 @@
+@startuml
+skinparam dpi 200
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 12
+skinparam sequenceMessageAlign center
+skinparam ParticipantBackgroundColor #F2F2F2
+skinparam ParticipantBorderColor #333333
+skinparam ArrowColor #333333
+skinparam SequenceGroupBackgroundColor #EEEEEE
+autonumber
+
+actor Paciente
+participant "Vista / API\n(FastAPI)" as API
+participant TriageService as TS
+participant CircuitBreaker as CB
+participant "AsistenteIAPort\n(LLM simulado)" as LLM
+participant "AsistenteReglas\n(fallback)" as REG
+participant CitaService as CS
+participant "RepositorioPort" as REPO
+actor "Profesional" as MED
+
+Paciente -> API : POST /api/citas (síntomas, sede, especialidad)
+API -> TS : registrar(pacienteId, solicitud)
+TS -> CB : llamar(evaluar)
+alt circuito cerrado y proveedor disponible
+  CB -> LLM : evaluar(solicitud)
+  LLM --> CB : ResultadoTriage (motor = llm_simulado)
+  CB --> TS : resultado
+else proveedor caído o circuito abierto
+  CB -[#red]-> TS : ProveedorIAError / CircuitoAbierto
+  TS -> REG : evaluar(solicitud)
+  REG --> TS : ResultadoTriage (motor = reglas, modo degradado)
+end
+TS -> REPO : agregar(RegistroTriage) + bitácora
+TS --> API : RegistroTriage (prioridad sugerida)
+API -> CS : asignar(pacienteId, sede, esp, prioridad)
+CS -> REPO : buscar franja libre y marcar ocupada
+CS --> API : Cita (estado según prioridad)
+API --> Paciente : 201 prioridad sugerida + cita
+opt prioridad alta o urgente
+  MED -> API : POST /api/triage/{id}/confirmar
+  API -> TS : confirmar(triageId, profesionalId, prioridad)
+  API -> CS : confirmar(citaId)
+  API --> MED : 200 cita confirmada
+end
+@enduml

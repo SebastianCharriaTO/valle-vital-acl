@@ -1,0 +1,63 @@
+@startuml
+skinparam dpi 200
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+skinparam classAttributeIconSize 0
+skinparam ClassBackgroundColor #F7F7F7
+skinparam ClassBorderColor #333333
+skinparam PackageBackgroundColor #FFFFFF
+skinparam ArrowColor #333333
+hide empty members
+
+
+skinparam stereotypeCBackgroundColor #DDDDDD
+class Paciente <<dominio>> {
+  + id: str
+  + nombre: str
+  + edad: int
+}
+class SolicitudTriage <<dominio>> {
+  + sintomas: List<str>
+  + edad: int
+  + diasEvolucion: int
+  + temperaturaC: float
+}
+class ResultadoTriage <<dominio>> {
+  + prioridad: Prioridad
+  + puntaje: int
+  + explicacion: str
+  + motor: str
+  + requiereConfirmacion: bool
+}
+class RegistroTriage <<dominio>> {
+  + id: str
+  + prioridadFinal: Prioridad
+  + confirmadoPor: str
+}
+class Cita <<dominio>> {
+  + id: str
+  + inicio: datetime
+  + prioridad: Prioridad
+  + estado: EstadoCita
+}
+class InventarioSede <<dominio>> {
+  + stock: int
+  + minimo: int
+}
+class SugerenciaTraslado <<dominio>> {
+  + cantidad: int
+  + motivo: str
+  + estado: EstadoSugerencia
+}
+
+Paciente "1" -- "0..*" RegistroTriage
+Paciente "1" -- "0..*" Cita
+RegistroTriage *-- "1" SolicitudTriage
+RegistroTriage *-- "1" ResultadoTriage
+RegistroTriage "1" -- "0..1" Cita : origina
+SugerenciaTraslado "0..*" -- "1" InventarioSede : repone
+Paciente -[hidden]right- Cita
+SolicitudTriage -[hidden]right- ResultadoTriage
+InventarioSede -[hidden]right- SugerenciaTraslado
+@enduml

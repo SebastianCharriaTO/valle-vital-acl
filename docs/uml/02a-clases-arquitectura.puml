@@ -1,0 +1,76 @@
+@startuml
+skinparam dpi 200
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+skinparam classAttributeIconSize 0
+skinparam ClassBackgroundColor #F7F7F7
+skinparam ClassBorderColor #333333
+skinparam PackageBackgroundColor #FFFFFF
+skinparam ArrowColor #333333
+hide empty members
+left to right direction
+
+
+skinparam stereotypeCBackgroundColor #DDDDDD
+class TriageService <<servicio>> {
+  - primario: AsistenteIAPort
+  - fallback: AsistenteIAPort
+  - breaker: CircuitBreaker
+  + evaluar(s: SolicitudTriage): ResultadoTriage
+  + registrar(pacienteId, s): RegistroTriage
+  + confirmar(triageId, profId, p): RegistroTriage
+}
+class CitaService <<servicio>> {
+  + asignar(pacId, sedeId, esp, p, triageId): Cita
+  + cancelar(citaId): Cita
+  + reprogramar(citaId): Cita
+  + confirmar(citaId): Cita
+}
+class FarmaciaService <<servicio>> {
+  + inventario(sedeId): List<InventarioSede>
+  + bajoMinimo(): List<InventarioSede>
+  + generarSugerencias(): List<SugerenciaTraslado>
+  + resolver(sugId, aprobar: bool): SugerenciaTraslado
+}
+class Bitacora <<servicio>> {
+  + registrar(tipo, detalle, motor)
+  + listar(n): List<EntradaBitacora>
+}
+class CircuitBreaker <<resiliencia>> {
+  - umbral: int
+  - recuperacion: float
+  - fallos: int
+  + estado: EstadoCircuito
+  + llamar(fn): R
+}
+interface AsistenteIAPort <<puerto>> {
+  + nombre: str
+  + evaluar(s: SolicitudTriage): ResultadoTriage
+}
+interface "RepositorioPort<T>" as RepositorioPort <<puerto>> {
+  + agregar(e: T): T
+  + obtener(id): T
+  + listar(filtro): List<T>
+  + actualizar(e: T): T
+}
+class AsistenteReglasAdapter <<adaptador>> {
+  + evaluar(s): ResultadoTriage
+}
+class AsistenteLLMSimuladoAdapter <<adaptador>> {
+  + falla: bool
+  + evaluar(s): ResultadoTriage
+}
+class "RepositorioMemoria<T>" as RepositorioMemoria <<adaptador>> {
+  - datos: Dict<str, T>
+}
+TriageService --> CircuitBreaker
+TriageService --> AsistenteIAPort : usa
+TriageService --> Bitacora
+CitaService --> RepositorioPort
+FarmaciaService --> RepositorioPort
+AsistenteReglasAdapter ..|> AsistenteIAPort
+AsistenteLLMSimuladoAdapter ..|> AsistenteIAPort
+AsistenteLLMSimuladoAdapter --> AsistenteReglasAdapter : criterio base
+RepositorioMemoria ..|> RepositorioPort
+@enduml

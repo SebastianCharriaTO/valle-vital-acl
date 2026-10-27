@@ -1,0 +1,48 @@
+@startuml
+left to right direction
+skinparam dpi 200
+skinparam shadowing false
+skinparam monochrome false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 15
+skinparam usecaseBackgroundColor #F2F2F2
+skinparam usecaseBorderColor #333333
+skinparam actorBorderColor #333333
+skinparam rectangleBackgroundColor #FFFFFF
+skinparam rectangleBorderColor #333333
+skinparam ArrowColor #333333
+
+actor "Paciente" as PAC
+actor "Profesional\nde salud" as MED
+actor "Gestor\nde citas" as GES
+actor "Regente de\nfarmacia" as REG
+actor "Administrador" as ADM
+actor "Proveedor de IA\nexterno" as IA <<sistema>>
+
+rectangle "Asistente Clínico-Logístico Valle Vital (ACL)" {
+  usecase "CU-01\nSolicitar cita" as CU01
+  usecase "CU-02\nRegistrar síntomas y obtener\nprioridad sugerida" as CU02
+  usecase "CU-03\nConfirmar o ajustar\nprioridad" as CU03
+  usecase "CU-04\nAsignar, reprogramar\ny cancelar cita" as CU04
+  usecase "CU-05\nConsultar inventario\npor sede" as CU05
+  usecase "CU-06\nGenerar sugerencia\nde traslado" as CU06
+  usecase "CU-07\nAprobar o rechazar\ntraslado" as CU07
+  usecase "CU-08\nVer estado del sistema,\nbitácora y parámetros" as CU08
+  usecase "Usar reglas locales\n(fallback)" as FB
+}
+
+PAC --> CU01
+MED --> CU03
+GES --> CU04
+REG --> CU05
+REG --> CU07
+ADM --> CU08
+CU06 <-- REG
+CU01 ..> CU02 : <<include>>
+CU02 --> IA
+FB .u.> CU02 : <<extend>>\n[proveedor caído]
+CU03 ..> CU04 : <<extend>>\n[prioridad alta/urgente]
+CU06 ..> CU05 : <<include>>
+CU07 ..> CU06 : <<include>>
+GES --> CU01
+@enduml
